@@ -76,10 +76,9 @@
         }
         /* 新增：歌曲封面圖片樣式 (長寬體、不切割) */
         .song-cover {
-            width: auto;
-            height: 10%;
-            max-height: 100px;
-            min-height: 30px;
+            width: 70%;
+            max-width: 500px;
+            min-width: 100px;
             object-fit: contain;     /* 保持長寬比例，不切割圖片 */
             border-radius: 6px;      /* 精緻微圓角 */
             background-color: #2a2a2a; /* 圖片載入前或比例不符時的襯底背景 */
@@ -760,10 +759,71 @@ function checkOrientation() {
 window.addEventListener('DOMContentLoaded', checkOrientation);
 // 手機轉向或視窗大小改變時，即時再次檢查
 window.addEventListener('resize', checkOrientation);
+</script>
+
+<div style="text-align: center; color: #888888; font-size: 14px; margin-top: 20px;">
+    <p>總次數：<span id="view-count" style="color: #00e676; font-weight: bold;">載入中...</span> 次瀏覽</p>
+</div>
+
+<script>
+  // 替換成你部署後的 Cloudflare Workers 網址
+  const workerUrl = 'https://wispy-wind-f5df.i-dle-melon.workers.dev/'; 
+    
+// 檢查這一個分頁是否已經算過瀏覽量
+if (!sessionStorage.getItem('has_voted')) {
+  // 1. 如果是第一次進來，呼叫 API（這會讓 KV 資料庫 +1）
+  fetch(workerUrl)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('view-count').innerText = data.views;
+      // 標記這個分頁已經算過次數了
+      sessionStorage.setItem('has_voted', 'true');
+      // 把當前的數字也存起來，方便重整時使用
+      sessionStorage.setItem('current_views', data.views);
+    })
+    .catch(error => {
+      console.error('計數器載入失敗:', error);
+      document.getElementById('view-count').innerText = '0';
+    });
+} else {
+  // 2. 如果是重新整理（已經有標記了），就直接抓最新數字，但不讓資料庫 +1
+  // 提示：為了不讓資料庫增加，我們可以另外在 Worker 寫一個不加次數的邏輯，
+  // 或者是直接顯示剛剛存下來的數字：
+  const savedViews = sessionStorage.getItem('current_views');
+  document.getElementById('view-count').innerText = savedViews ? savedViews : '---';
+}
 
 </script>
 </body>
 </html>
-<footer class="site-footer">
-    <p>© 2026 <a href="https://line.me/ti/g2/lquJYJWOJudOLkUti7prCFNeSbvKF2vn2AdEYQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank">i-dle西瓜攤</a>GigiBoss. All rights reserved. Designed & Maintained by GigiBoss</p>
+<footer class="site-footer" style="
+    position: relative; 
+    margin-top: 0px; 
+    width: 100%; 
+    text-align: center; 
+    padding: 10px 0 10px 0; 
+    background-color: #111111; 
+    border-top: 1px solid #2a2a2a;
+">
+<p style="margin: 0; font-size: 14px; color: #888888; line-height: 1;">
+        &copy; 2026 
+        <a href="https://line.me/ti/g2/lquJYJWOJudOLkUti7prCFNeSbvKF2vn2AdEYQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" 
+           target="_blank" 
+           style="color: #00cd3c; text-decoration: none; font-weight: bold;">
+           i-dle西瓜攤
+        </a> 
+        GigiBoss. All rights reserved. Designed & Maintained by
+        <a href="https://www.threads.com/@fangwh_529?igshid=NTc4MTIwNjQ2YQ=="target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 3px; background-color: #121212; border: 1px solid #262626; border-radius: 16px; text-decoration: none; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 600; margin-left: 6px; vertical-align: middle;">
+    
+    <!-- 圖示黑底圓圈 -->
+    <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; background-color: #000000; border-radius: 50%; flex-shrink: 0;">
+        <!-- 官方 SVG 圖片檔 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Threads_%28app%29_logo.svg" alt="Threads" style="width: 14px; height: 14px; filter: brightness(0) invert(1); display: block;">
+    </span>
+
+    <!-- 帳號名稱 -->
+    <span>GigiBoss</span>
+</a>
+    </p>
+    
 </footer>
